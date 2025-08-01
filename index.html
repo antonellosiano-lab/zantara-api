@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>ZANTARA – Bali Zero</title>
+  <style>
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      background: linear-gradient(to right, #ffffff, #f7f3eb);
+      color: #333;
+      padding: 40px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1 {
+      font-size: 2.5rem;
+      color: #b58544;
+      border-bottom: 2px solid #b58544;
+      padding-bottom: 10px;
+    }
+    textarea {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      box-sizing: border-box;
+      margin-top: 20px;
+    }
+    button {
+      background-color: #b58544;
+      color: white;
+      padding: 12px 25px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+    button:hover {
+      background-color: #a47536;
+    }
+    pre {
+      background-color: #1a1a1a;
+      color: #0f0;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 10px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>ZANTARA – Bali Zero AI Strategist</h1>
+  <p>Chiedi qualcosa a ZANTARA:</p>
+  <textarea id="prompt" rows="5">Scrivi una somasi legale per affitto non pagato</textarea><br>
+  <button onclick="send()">Invia</button>
+  <h3>Risposta:</h3>
+  <pre id="output">...</pre>
+
+  <script>
+    async function send() {
+      const prompt = document.getElementById('prompt').value;
+      const res = await fetch('https://zantara-api.vercel.app/api/zantara', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      const data = await res.json();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    }
+  </script>
+</body>
+</html>
