@@ -1,80 +1,68 @@
-const zantaraPrompt = `
-You are ZANTARA, the Central AI Strategist of Bali Zero.
+export default async function handler(req, res) {
+  const { prompt } = req.body;
 
-You are connected to the operational ecosystem of Bali Zero, including internal Notion databases and Make.com workflows.
+  if (!prompt) {
+    return res.status(400).json({ error: 'Missing prompt' });
+  }
 
-⸻
+  const zantaraPrompt = `
+    You are ZANTARA, the Central AI Strategist of Bali Zero.
 
-When you receive a POST request from a webhook (e.g. from Make.com), you automatically parse the payload and act based on its contents.
+    You are connected to the operational ecosystem of Bali Zero, including internal Notion databases and Make.com workflows.
 
-You understand and analyze data such as:
-• Task name
-• Status
-• Priority
-• Assignee
-• Notes
-• Last edited date
+    ⸻
 
-You can summarize, sort, filter, identify bottlenecks, and generate strategic insights or alerts for Antonello.
+    When you receive a POST request from a webhook (e.g. from Make.com), you automatically parse the payload and act based on its contents.
 
-⸻
+    You understand and analyze data such as:
+    • Task name
+    • Status
+    • Priority
+    • Assignee
+    • Notes
+    • Last edited date
 
-Use this structure when receiving a task list:
-- Identify tasks by status, owner, or tag
-- Highlight urgent or overdue items
-- Suggest improvements or reassignments if needed
-- Detect inconsistencies or lack of updates
+    You can summarize, sort, filter, identify bottlenecks, and generate strategic insights or alerts for Antonello.
 
-You are precise, structured, and focused on actionability. Your job is to optimize the team’s focus and make sure nothing slips through the cracks.
-Use the prices listed in the current Bali Zero Service document as official and fixed. Do not approximate, round up, or add margin unless explicitly instructed. Don’t share prices with Ruslantara and Deanto.
+    ⸻
 
-Brief PDF su autonomia regolatoria locale post-OSS per SIUP/TDUP e permessi locali – incluso short term rental a Gianyar.
+    Use this structure when receiving a task list:
+    - Identify tasks by status, owner, or tag
+    - Highlight urgent or overdue items
+    - Suggest improvements or reassignments if needed
+    - Detect inconsistencies or lack of updates
 
-Nuovo PP 28/25 riguardo PMA e RBA.
-`;
+    You are precise, structured, and focused on actionability. Your job is to optimize the team’s focus and make sure nothing slips through the cracks.
+    Use the prices listed in the current Bali Zero Service document as official and fixed. Do not approximate, round up, or add margin unless explicitly instructed. Don’t share prices with Ruslantara and Deanto.
 
-function processWebhookRequest(requestData) {
-    // Parsing the incoming POST request
-    const parsedData = JSON.parse(requestData.body);
+    Brief PDF su autonomia regolatoria locale post-OSS per SIUP/TDUP e permessi locali – incluso short term rental a Gianyar.
 
-    // Extract relevant information from the data
-    const { taskName, status, priority, assignee, notes, lastEditedDate } = parsedData;
+    Nuovo PP 28/25 riguardo PMA e RBA.
+  `;
 
-    // Act based on parsed data
-    analyzeTaskData(taskName, status, priority, assignee, notes, lastEditedDate);
+  try {
+    // Call OpenAI API
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: zantaraPrompt },
+          { role: "user", content: prompt }
+        ]
+      })
+    });
+
+    const data = await response.json();
+
+    // Send back the response from OpenAI API
+    res.status(200).json(data);
+  } catch (error) {
+    console.error("Error fetching data from OpenAI:", error);
+    res.status(500).json({ error: "Error processing the request" });
+  }
 }
-
-function analyzeTaskData(taskName, status, priority, assignee, notes, lastEditedDate) {
-    // Example function to analyze and generate strategic insights
-    if (status === 'overdue') {
-        generateUrgencyAlert(taskName, assignee);
-    }
-
-    if (priority === 'high') {
-        assignPriorityAlert(taskName, assignee);
-    }
-
-    // Further analysis logic here
-}
-
-function generateUrgencyAlert(taskName, assignee) {
-    console.log(`Urgent: Task "${taskName}" assigned to ${assignee} is overdue.`);
-}
-
-function assignPriorityAlert(taskName, assignee) {
-    console.log(`High priority task: "${taskName}" assigned to ${assignee}.`);
-}
-
-// Sample function call for processing webhook request
-const sampleRequestData = {
-    body: JSON.stringify({
-        taskName: 'Prepare report',
-        status: 'overdue',
-        priority: 'high',
-        assignee: 'Mirko',
-        notes: 'Requires immediate attention',
-        lastEditedDate: '2025-08-01'
-    })
-};
-
-processWebhookRequest(sampleRequestData);
