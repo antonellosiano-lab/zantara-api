@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>ZANTARA Hook Test</title>
+</head>
+<body>
+  <form id="hookForm">
+    <textarea id="inputText" name="inputText" placeholder="Enter request"></textarea>
+    <button type="submit">Send</button>
+  </form>
+  <script>
+    document.getElementById('hookForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const inputText = document.getElementById('inputText').value;
+      const res = await fetch('/api/zantara-hook', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (localStorage.getItem('ZANTARA_SECRET_KEY') || '')
+        },
+        body: JSON.stringify({ inputText })
+      });
+      const data = await res.json();
+      alert(JSON.stringify(data));
+    });
+  </script>
+</body>
+</html>
