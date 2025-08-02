@@ -9,7 +9,13 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Method Not Allowed"
     }));
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({
+      success: false,
+      status: 405,
+      summary: "Method Not Allowed",
+      error: "Method Not Allowed",
+      nextStep: "Send a POST request"
+    });
   }
 
   // Check that the API key is present in the environment
@@ -22,7 +28,13 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Missing OpenAI API Key"
     }));
-    return res.status(500).json({ error: "Missing OpenAI API Key" });
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      summary: "Missing OpenAI API Key",
+      error: "Missing OpenAI API Key",
+      nextStep: "Set OPENAI_API_KEY in environment"
+    });
   }
 
   const { prompt } = req.body;
@@ -37,7 +49,13 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Missing prompt in request body"
     }));
-    return res.status(400).json({ error: "Missing prompt in request body" });
+    return res.status(400).json({
+      success: false,
+      status: 400,
+      summary: "Missing prompt in request body",
+      error: "Missing prompt in request body",
+      nextStep: "Include prompt in JSON body"
+    });
   }
 
   const zantaraPrompt = `
@@ -104,6 +122,8 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       success: true,
+      status: 200,
+      summary: "Request completed successfully",
       data
     });
   } catch (error) {
@@ -116,6 +136,12 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Internal Server Error"
     }));
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({
+      success: false,
+      status: 500,
+      summary: "Internal Server Error",
+      error: "Internal Server Error",
+      nextStep: "Check server logs and retry"
+    });
   }
 }
