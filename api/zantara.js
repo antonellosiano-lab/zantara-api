@@ -9,7 +9,7 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Method Not Allowed"
     }));
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ success: false, error: "Method Not Allowed" });
   }
 
   // Check that the API key is present in the environment
@@ -22,10 +22,10 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Missing OpenAI API Key"
     }));
-    return res.status(500).json({ error: "Missing OpenAI API Key" });
+    return res.status(500).json({ success: false, error: "Missing OpenAI API Key" });
   }
 
-  const { prompt } = req.body;
+  const { prompt, requester } = req.body;
 
   // Check that the prompt is present in the request body
   if (!prompt) {
@@ -37,7 +37,22 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Missing prompt in request body"
     }));
-    return res.status(400).json({ error: "Missing prompt in request body" });
+    return res.status(400).json({ success: false, error: "Missing prompt in request body" });
+  }
+
+  // Block specific requesters
+  const blockedRequesters = ["Ruslantara", "Deanto"];
+  if (requester && blockedRequesters.some(name => name.toLowerCase() === requester.toLowerCase())) {
+    console.log(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/zantara",
+      action: "blockedRequester",
+      status: 403,
+      userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+      requester,
+      message: "Requester blocked"
+    }));
+    return res.status(403).json({ success: false, error: "Request denied" });
   }
 
   const zantaraPrompt = `
@@ -116,6 +131,6 @@ export default async function handler(req, res) {
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
       message: "Internal Server Error"
     }));
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ success: false, error: "Internal Server Error" });
   }
 }
