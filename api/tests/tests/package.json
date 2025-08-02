@@ -1,0 +1,20 @@
+ (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
+diff --git a//dev/null b/package.json
+index 0000000000000000000000000000000000000000..14212bde7a0d7089c9476f7325cc045438a7d53b 100644
+--- a//dev/null
++++ b/package.json
+@@ -0,0 +1,11 @@
++{
++  "name": "zantara-api",
++  "version": "1.0.0",
++  "type": "module",
++  "scripts": {
++    "test": "vitest run"
++  },
++  "devDependencies": {
++    "vitest": "^1.4.0"
++  }
++}
+ 
+EOF
+)
