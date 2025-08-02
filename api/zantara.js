@@ -1,9 +1,9 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/api/zantara.js b/api/zantara.js
-index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2d0cdc01a 100644
+index c240f53f18b834f2c70427147a6eae2bc29dd18a..8e210a437710be20d6feb4629bceffcbae0344c5 100644
 --- a/api/zantara.js
 +++ b/api/zantara.js
-@@ -1,65 +1,80 @@
+@@ -1,65 +1,83 @@
  export default async function handler(req, res) {
    // Only allow POST requests
    if (req.method !== "POST") {
@@ -16,7 +16,13 @@ index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2
        message: "Method Not Allowed"
      }));
 -    return res.status(405).json({ error: "Method Not Allowed" });
-+    return res.status(405).json({ success: false, error: "Method Not Allowed" });
++    return res.status(405).json({
++      success: false,
++      status: 405,
++      summary: "Method Not Allowed",
++      error: "Method Not Allowed",
++      nextStep: "Send a POST request"
++    });
    }
  
    // Check that the API key is present in the environment
@@ -30,11 +36,16 @@ index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2
        message: "Missing OpenAI API Key"
      }));
 -    return res.status(500).json({ error: "Missing OpenAI API Key" });
-+    return res.status(500).json({ success: false, error: "Missing OpenAI API Key" });
++    return res.status(500).json({
++      success: false,
++      status: 500,
++      summary: "Missing OpenAI API Key",
++      error: "Missing OpenAI API Key",
++      nextStep: "Set OPENAI_API_KEY in environment"
++    });
    }
  
--  const { prompt } = req.body;
-+  const { prompt, requester } = req.body;
+   const { prompt } = req.body;
  
    // Check that the prompt is present in the request body
    if (!prompt) {
@@ -47,22 +58,13 @@ index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2
        message: "Missing prompt in request body"
      }));
 -    return res.status(400).json({ error: "Missing prompt in request body" });
-+    return res.status(400).json({ success: false, error: "Missing prompt in request body" });
-+  }
-+
-+  // Block specific requesters
-+  const blockedRequesters = ["Ruslantara", "Deanto"];
-+  if (requester && blockedRequesters.some(name => name.toLowerCase() === requester.toLowerCase())) {
-+    console.log(JSON.stringify({
-+      timestamp: new Date().toISOString(),
-+      route: "/api/zantara",
-+      action: "blockedRequester",
-+      status: 403,
-+      userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-+      requester,
-+      message: "Requester blocked"
-+    }));
-+    return res.status(403).json({ success: false, error: "Request denied" });
++    return res.status(400).json({
++      success: false,
++      status: 400,
++      summary: "Missing prompt in request body",
++      error: "Missing prompt in request body",
++      nextStep: "Include prompt in JSON body"
++    });
    }
  
    const zantaraPrompt = `
@@ -89,10 +91,22 @@ index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2
      Use this structure when receiving a task list:
      - Identify tasks by status, owner, or tag
 diff --git a/api/zantara.js b/api/zantara.js
-index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2d0cdc01a 100644
+index c240f53f18b834f2c70427147a6eae2bc29dd18a..8e210a437710be20d6feb4629bceffcbae0344c5 100644
 --- a/api/zantara.js
 +++ b/api/zantara.js
-@@ -94,28 +109,28 @@ export default async function handler(req, res) {
+@@ -82,40 +100,48 @@ export default async function handler(req, res) {
+         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`, // API key from environment variables
+         "Content-Type": "application/json"
+       },
+       body: JSON.stringify({
+         model: "gpt-4",
+         messages: [
+           { role: "system", content: zantaraPrompt },
+           { role: "user", content: prompt }
+         ]
+       })
+     });
+ 
      const data = await response.json();
  
      console.log(JSON.stringify({
@@ -106,6 +120,8 @@ index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2
  
      res.status(200).json({
        success: true,
++      status: 200,
++      summary: "Request completed successfully",
        data
      });
    } catch (error) {
@@ -119,7 +135,13 @@ index c240f53f18b834f2c70427147a6eae2bc29dd18a..02e43a045ede87f594541ec43eec23b2
        message: "Internal Server Error"
      }));
 -    res.status(500).json({ error: "Internal Server Error" });
-+    res.status(500).json({ success: false, error: "Internal Server Error" });
++    res.status(500).json({
++      success: false,
++      status: 500,
++      summary: "Internal Server Error",
++      error: "Internal Server Error",
++      nextStep: "Check server logs and retry"
++    });
    }
  }
  
