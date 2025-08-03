@@ -1,0 +1,12 @@
+{
+  "name": "zantara-api",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "node-mocks-http": "^1.11.0",
+    "vitest": "^1.0.0"
+  }
+}
