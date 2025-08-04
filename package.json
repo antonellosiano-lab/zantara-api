@@ -8,5 +8,8 @@
   "devDependencies": {
     "node-mocks-http": "^1.11.0",
     "vitest": "^1.0.0"
+  },
+  "dependencies": {
+    "nodemailer": "^6.10.1"
   }
 }
