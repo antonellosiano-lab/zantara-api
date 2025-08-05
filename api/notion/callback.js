@@ -8,7 +8,10 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing code' });
   }
 
-  try {
+  try {console.log('🔍 DEBUG ENV VARS');
+console.log('NOTION_CLIENT_ID:', process.env.NOTION_CLIENT_ID);
+console.log('NOTION_CLIENT_SECRET:', process.env.NOTION_CLIENT_SECRET ? '✅ Defined' : '❌ Undefined');
+console.log('NOTION_REDIRECT_URI:', process.env.NOTION_REDIRECT_URI);
     const response = await axios.post('https://api.notion.com/v1/oauth/token', {
       grant_type: 'authorization_code',
       code: code,
