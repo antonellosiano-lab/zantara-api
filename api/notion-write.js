@@ -1,36 +1,35 @@
-const { Client } = require('@notionhq/client');
+// /pages/api/notion-write.ts
 
-const notion = new Client({
-  auth: process.env.NOTION_TOKEN,
-});
+import type { NextApiRequest, NextApiResponse } from "next";
+import { Client } from "@notionhq/client";
 
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+const notion = new Client({ auth: process.env.NOTION_TOKEN });
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ message: "Only POST requests allowed" });
   }
 
   const { request, summary } = req.body;
 
   try {
     const response = await notion.pages.create({
-      parent: {
-        database_id: process.env.NOTION_DATABASE_ID,
-      },
+      parent: { database_id: process.env.NOTION_DATABASE_ID! },
       properties: {
         Request: {
           title: [
             {
               text: {
-                content: request || 'Nessun testo',
+                content: request,
               },
             },
           ],
         },
-        Response: {
+        "Response Summary": {
           rich_text: [
             {
               text: {
-                content: summary || 'Nessun riassunto',
+                content: summary || "No summary",
               },
             },
           ],
@@ -38,9 +37,9 @@ module.exports = async (req, res) => {
       },
     });
 
-    res.status(200).json({ success: true, data: response });
+    res.status(200).json({ message: "Page created", data: response });
   } catch (error) {
-    console.error('Errore Notion:', error.body || error);
-    res.status(500).json({ error: 'Errore scrittura Notion', detail: error.body });
+    console.error("❌ ERROR Notion write:", error);
+    res.status(500).json({ message: "Server error", error });
   }
-};
+}
