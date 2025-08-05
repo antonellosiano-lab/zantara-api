@@ -1,6 +1,7 @@
 import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 import { getAgentPrompt } from "../constants/prompts.js";
+import { saveAgentOutput } from "../helpers/notionClient.js";
 
 export function createAgentHandler(agentName) {
   return async function handler(req, res) {
@@ -99,6 +100,20 @@ export function createAgentHandler(agentName) {
       });
 
       const data = await response.json();
+
+      const responseText = data.choices?.[0]?.message?.content || "";
+      try {
+        await saveAgentOutput(process.env.NOTION_DATABASE_ID, agentName, prompt, responseText);
+      } catch (err) {
+        console.log(JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: `/api/${agentName}`,
+          action: "notionError",
+          status: 500,
+          userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+          message: err.message
+        }));
+      }
 
       console.log(JSON.stringify({
         timestamp: new Date().toISOString(),
