@@ -1,63 +1,46 @@
-// /api/notion-write.js
-
-import { Client } from '@notionhq/client';
+const { Client } = require('@notionhq/client');
 
 const notion = new Client({
   auth: process.env.NOTION_TOKEN,
 });
 
-const databaseId = process.env.NOTION_DATABASE_ID;
-
-export default async function handler(req, res) {
+module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    const { request, responseSummary, status, date } = req.body;
+  const { request, summary } = req.body;
 
-    const newPage = await notion.pages.create({
+  try {
+    const response = await notion.pages.create({
       parent: {
-        database_id: databaseId,
+        database_id: process.env.NOTION_DATABASE_ID,
       },
       properties: {
         Request: {
           title: [
             {
               text: {
-                content: request || 'No request provided',
+                content: request || 'Nessun testo',
               },
             },
           ],
         },
-        "Response Summary": {
+        Response: {
           rich_text: [
             {
               text: {
-                content: responseSummary || 'No summary',
+                content: summary || 'Nessun riassunto',
               },
             },
           ],
-        },
-        Status: {
-          select: {
-            name: status || 'Pending',
-          },
-        },
-        Date: {
-          date: {
-            start: date || new Date().toISOString(),
-          },
         },
       },
     });
 
-    res.status(200).json({ message: 'Success', pageId: newPage.id });
+    res.status(200).json({ success: true, data: response });
   } catch (error) {
-    console.error('Notion API Error:', error.body || error.message);
-    res.status(500).json({
-      error: 'Internal Server Error',
-      detail: error.body || error.message,
-    });
+    console.error('Errore Notion:', error.body || error);
+    res.status(500).json({ error: 'Errore scrittura Notion', detail: error.body });
   }
-}
+};
