@@ -4,33 +4,46 @@ export default async function handler(req, res) {
   const { code } = req.query;
 
   if (!code || typeof code !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid code parameter' });
+    return res.status(400).json({ error: 'Missing or invalid `code` parameter' });
   }
 
-  console.log("📦 ENV VARIABLES CHECK:");
-  console.log("NOTION_TOKEN:", process.env.NOTION_TOKEN ? "✅ LOADED" : "❌ MISSING");
-  console.log("NOTION_DATABASE_ID:", process.env.NOTION_DATABASE_ID ? "✅ LOADED" : "❌ MISSING");
-  console.log("MAKE_WEBHOOK_URL:", process.env.MAKE_WEBHOOK_URL ? "✅ LOADED" : "❌ MISSING");
+  console.log("🔐 ENV VARIABLES CHECK:");
+  const notionToken = process.env.NOTION_TOKEN;
+  const notionDatabaseId = process.env.NOTION_DATABASE_ID;
+
+  if (!notionToken || !notionDatabaseId) {
+    console.error("❌ Missing NOTION_TOKEN or NOTION_DATABASE_ID");
+    return res.status(500).json({ error: "Missing environment variables" });
+  }
 
   try {
-    // 🧠 Aggiungi qui la tua logica per il salvataggio su Notion o Make
-    res.status(200).json({ message: "Callback received." });
+    // 🔄 Optional: trasformazione del codice in contenuto Notion
+    const newEntry = {
+      parent: { database_id: notionDatabaseId },
+      properties: {
+        Title: {
+          title: [{ text: { content: `Request: ${code}` } }]
+        }
+      }
+    };
+
+    const notionRes = await axios.post(
+      'https://api.notion.com/v1/pages',
+      newEntry,
+      {
+        headers: {
+          'Authorization': `Bearer ${notionToken}`,
+          'Content-Type': 'application/json',
+          'Notion-Version': '2022-06-28'
+        }
+      }
+    );
+
+    console.log("✅ Entry saved to Notion:", notionRes.data.id);
+    return res.status(200).json({ success: true, notionPageId: notionRes.data.id });
+
   } catch (error) {
-    console.error("❌ ERROR:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("❌ Error saving to Notion:", error.response?.data || error.message);
+    return res.status(500).json({ error: "Failed to save to Notion" });
   }
-
-  // 👉 Se ti serve, puoi tenere questa chiamata token
-  const response = await axios.post('https://api.notion.com/v1/oauth/token', {
-    grant_type: 'authorization_code',
-    code: code,
-    redirect_uri: process.env.NOTION_REDIRECT_URI
-  }, {
-    auth: {
-      username: process.env.NOTION_CLIENT_ID,
-      password: process.env.NOTION_CLIENT_SECRET
-    }
-  });
-
-  console.log("🎯 TOKEN RESPONSE:", response.data);
 }
