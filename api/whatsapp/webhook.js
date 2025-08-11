@@ -4,7 +4,7 @@ export default function handler(req, res) {
     const token = req.query['hub.verify_token'];
     const challenge = req.query['hub.challenge'];
 
-    if (mode === 'subscribe' && token === WHATSAPP_VERIFY_TOKEN) {
+    if (mode === 'subscribe' && token === ZANTARA_WHATSAPP_TOKEN) {
       return res.status(200).send(challenge); // deve essere plain text
     }
     return res.sendStatus(403);
