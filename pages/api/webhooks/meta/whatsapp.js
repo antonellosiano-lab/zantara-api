@@ -1,3 +1,9 @@
+export const config = {
+  api: {
+    bodyParser: false, // disattiva il parsing automatico
+  },
+};
+
 export default function handler(req, res) {
   const VERIFY_TOKEN = process.env.ZANTARA_WHATSAPP_TOKEN || "ZANTARA_WHATSAPP_TOKEN";
 
@@ -8,13 +14,20 @@ export default function handler(req, res) {
 
     if (mode && token && mode === "subscribe" && token === VERIFY_TOKEN) {
       console.log("Webhook verified successfully");
+      res.setHeader("Content-Type", "text/plain");
       res.status(200).send(challenge);
     } else {
       res.sendStatus(403);
     }
   } else if (req.method === "POST") {
-    console.log("Incoming webhook:", JSON.stringify(req.body, null, 2));
-    res.sendStatus(200);
+    let rawBody = "";
+    req.on("data", chunk => {
+      rawBody += chunk;
+    });
+    req.on("end", () => {
+      console.log("Incoming webhook:", rawBody);
+      res.sendStatus(200);
+    });
   } else {
     res.sendStatus(405);
   }
