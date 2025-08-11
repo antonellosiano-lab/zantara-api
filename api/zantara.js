@@ -106,8 +106,10 @@ export default async function handler(req, res) {
       try {
         const response = await fetch(`${baseUrl}/api/${agent}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          "Notion-Version": "2022-06-28"
+          headers: {
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28",
+          },
           body: JSON.stringify({ prompt, requester })
         });
         results[agent] = await response.json();
