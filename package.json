@@ -5,9 +5,18 @@
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "start": "node api/notion-write.js"
+    "start": "node api/notion-write.js",
+    "lint": "eslint .",
+    "test": "vitest"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.4"
+    "@notionhq/client": "^2.2.4",
+    "axios": "^1.6.7",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "node-mocks-http": "^1.13.0",
+    "vitest": "^1.2.0"
   }
 }

@@ -100,26 +100,31 @@ export default async function handler(req, res) {
 
   try {
     const baseUrl = process.env.BASE_URL || `http://${req.headers.host}`;
-    const results = {};
 
-    for (const agent of agents) {
-      try {
-        const response = await fetch(`${baseUrl}/api/${agent}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          "Notion-Version": "2022-06-28"
-          body: JSON.stringify({ prompt, requester })
-        });
-        results[agent] = await response.json();
-      } catch (err) {
-        results[agent] = {
+    const tasks = agents.map(agent =>
+      fetch(`${baseUrl}/api/${agent}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt, requester })
+      }).then(r => r.json())
+    );
+
+    const results = await Promise.allSettled(tasks);
+
+    const data = {};
+    results.forEach((result, index) => {
+      const agent = agents[index];
+      if (result.status === "fulfilled") {
+        data[agent] = result.value;
+      } else {
+        data[agent] = {
           success: false,
           status: 500,
           summary: "Agent call failed",
           error: "Agent call failed"
         };
       }
-    }
+    });
 
     console.log(
       JSON.stringify({
@@ -136,7 +141,7 @@ export default async function handler(req, res) {
       success: true,
       status: 200,
       summary: "All agents executed",
-      data: results
+      data
     });
   } catch (error) {
     console.log(
@@ -158,4 +163,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

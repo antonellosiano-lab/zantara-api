@@ -1,23 +1,58 @@
-import axios from 'axios';
+import axios from "axios";
+
+const log = (e) => console.log(JSON.stringify({
+  timestamp: new Date().toISOString(),
+  route: e.route,
+  action: e.action,
+  status: e.status,
+  message: e.message,
+  userIP: e.userIP,
+  meta: e.meta || null
+}));
 
 export default async function handler(req, res) {
-  const { code } = req.query;
+  const route = "/api/notion/callback";
+  const userIP = req.headers["x-forwarded-for"] || req.socket?.remoteAddress;
 
-  if (!code || typeof code !== 'string') {
-    return res.status(400).json({ error: 'Missing or invalid `code` parameter' });
+  if (req.method !== "GET") {
+    log({ route, action: "methodCheck", status: 405, message: "Method Not Allowed", userIP });
+    return res.status(405).json({
+      success: false,
+      status: 405,
+      summary: "Method Not Allowed",
+      error: "Method Not Allowed",
+      nextStep: "Send a GET request"
+    });
   }
 
-  console.log("🔐 ENV VARIABLES CHECK:");
-  const notionToken = process.env.NOTION_TOKEN;
+  const { code } = req.query;
+
+  if (!code || typeof code !== "string") {
+    log({ route, action: "validation", status: 400, message: "Missing or invalid `code` parameter", userIP });
+    return res.status(400).json({
+      success: false,
+      status: 400,
+      summary: "Missing or invalid `code` parameter",
+      error: "Missing or invalid `code` parameter",
+      nextStep: "Include code query parameter"
+    });
+  }
+
+  const notionToken = process.env.NOTION_API_KEY;
   const notionDatabaseId = process.env.NOTION_DATABASE_ID;
 
   if (!notionToken || !notionDatabaseId) {
-    console.error("❌ Missing NOTION_TOKEN or NOTION_DATABASE_ID");
-    return res.status(500).json({ error: "Missing environment variables" });
+    log({ route, action: "envCheck", status: 500, message: "Missing environment variables", userIP });
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      summary: "Missing environment variables",
+      error: "Missing environment variables",
+      nextStep: "Set NOTION_API_KEY and NOTION_DATABASE_ID"
+    });
   }
 
   try {
-    // 🔄 Optional: trasformazione del codice in contenuto Notion
     const newEntry = {
       parent: { database_id: notionDatabaseId },
       properties: {
@@ -28,22 +63,32 @@ export default async function handler(req, res) {
     };
 
     const notionRes = await axios.post(
-      'https://api.notion.com/v1/pages',
+      "https://api.notion.com/v1/pages",
       newEntry,
       {
         headers: {
-          'Authorization': `Bearer ${notionToken}`,
-          'Content-Type': 'application/json',
-          'Notion-Version': '2022-06-28'
+          Authorization: `Bearer ${notionToken}`,
+          "Content-Type": "application/json",
+          "Notion-Version": "2022-06-28"
         }
       }
     );
 
-    console.log("✅ Entry saved to Notion:", notionRes.data.id);
-    return res.status(200).json({ success: true, notionPageId: notionRes.data.id });
-
+    log({ route, action: "success", status: 200, message: "Entry saved to Notion", userIP });
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      summary: "Entry saved to Notion",
+      data: { notionPageId: notionRes.data.id }
+    });
   } catch (error) {
-    console.error("❌ Error saving to Notion:", error.response?.data || error.message);
-    return res.status(500).json({ error: "Failed to save to Notion" });
+    log({ route, action: "error", status: 500, message: "Failed to save to Notion", userIP, meta: error.message });
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      summary: "Failed to save to Notion",
+      error: "Failed to save to Notion",
+      nextStep: "Check server logs and retry"
+    });
   }
 }

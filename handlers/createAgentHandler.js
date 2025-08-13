@@ -2,17 +2,23 @@ import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 import { getAgentPrompt } from "../constants/prompts.js";
 
+const log = (e) => console.log(JSON.stringify({
+  timestamp: new Date().toISOString(),
+  route: e.route,
+  action: e.action,
+  status: e.status,
+  message: e.message,
+  userIP: e.userIP,
+  meta: e.meta || null
+}));
+
 export function createAgentHandler(agentName) {
   return async function handler(req, res) {
+    const route = `/api/${agentName}`;
+    const userIP = req.headers["x-forwarded-for"] || req.socket?.remoteAddress;
+
     if (req.method !== "POST") {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "methodCheck",
-        status: 405,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Method Not Allowed"
-      }));
+      log({ route, action: "methodCheck", status: 405, message: "Method Not Allowed", userIP });
       return res.status(405).json({
         success: false,
         status: 405,
@@ -25,14 +31,7 @@ export function createAgentHandler(agentName) {
     try {
       validateOpenAIKey();
     } catch (err) {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "keyValidation",
-        status: 500,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: err.message
-      }));
+      log({ route, action: "keyValidation", status: 500, message: err.message, userIP });
       return res.status(500).json({
         success: false,
         status: 500,
@@ -45,14 +44,7 @@ export function createAgentHandler(agentName) {
     const { prompt, requester } = req.body || {};
 
     if (!prompt) {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "promptValidation",
-        status: 400,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Missing prompt in request body"
-      }));
+      log({ route, action: "promptValidation", status: 400, message: "Missing prompt in request body", userIP });
       return res.status(400).json({
         success: false,
         status: 400,
@@ -63,14 +55,7 @@ export function createAgentHandler(agentName) {
     }
 
     if (isBlockedRequester(requester)) {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "blockedRequester",
-        status: 403,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Requester is blocked"
-      }));
+      log({ route, action: "blockedRequester", status: 403, message: "Requester is blocked", userIP });
       return res.status(403).json({
         success: false,
         status: 403,
@@ -85,9 +70,8 @@ export function createAgentHandler(agentName) {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
           "Content-Type": "application/json"
-          "Notion-Version": "2022-06-28"
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -100,14 +84,7 @@ export function createAgentHandler(agentName) {
 
       const data = await response.json();
 
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "success",
-        status: 200,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        summary: "Request completed successfully"
-      }));
+      log({ route, action: "success", status: 200, message: "Request completed successfully", userIP });
 
       return res.status(200).json({
         success: true,
@@ -116,15 +93,7 @@ export function createAgentHandler(agentName) {
         data
       });
     } catch (error) {
-      console.error("Error fetching data from OpenAI:", error);
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "error",
-        status: 500,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Internal Server Error"
-      }));
+      log({ route, action: "error", status: 500, message: "Internal Server Error", userIP, meta: error.message });
       return res.status(500).json({
         success: false,
         status: 500,
