@@ -1,16 +1,20 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
+import fs from "fs";
+import path from "path";
 import handler from "../api/zantara.js";
 
-const agents = [
-  "antonelloDaily",
-  "baliZeroHub",
-  "morgana",
-  "setupMaster",
-  "taxGenius",
-  "theLegalArchitect",
-  "visaOracle"
-];
+// Dynamically discover agent endpoints based on API files using createAgentHandler
+const agents = fs
+  .readdirSync(path.join(process.cwd(), "api"))
+  .filter((file) => file.endsWith(".js") && file !== "zantara.js")
+  .filter((file) =>
+    fs
+      .readFileSync(path.join(process.cwd(), "api", file), "utf8")
+      .includes("createAgentHandler")
+  )
+  .map((file) => file.replace(".js", ""))
+  .sort();
 
 beforeEach(() => {
   process.env.OPENAI_API_KEY = "test";
@@ -61,7 +65,10 @@ describe("Zantara orchestrator", () => {
     expect(res.statusCode).toBe(200);
     const data = JSON.parse(res._getData());
     expect(data.success).toBe(true);
-    expect(Object.keys(data.data)).toEqual(agents);
+    expect(Object.keys(data.data).sort()).toEqual(agents);
+    for (const agent of agents) {
+      expect(data.data).toHaveProperty(agent);
+    }
     expect(global.fetch).toHaveBeenCalledTimes(agents.length);
   });
 });
