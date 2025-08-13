@@ -108,7 +108,7 @@ export default async function handler(req, res) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Notion-Version": "2022-06-28",
+            "Notion-Version": "2022-06-28"
           },
           body: JSON.stringify({ prompt, requester })
         });
