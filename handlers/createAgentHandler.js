@@ -84,11 +84,11 @@ export function createAgentHandler(agentName) {
     try {
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
-        headers: {
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-          "Notion-Version": "2022-06-28"
-        },
+          headers: {
+            "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+            "Content-Type": "application/json",
+            "Notion-Version": "2022-06-28"
+          },
         body: JSON.stringify({
           model: "gpt-4o-mini",
           messages: [
