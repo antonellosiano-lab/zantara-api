@@ -1,0 +1,21 @@
+{
+  "name": "ZION Router Blueprint",
+  "version": 1,
+  "triggers": [
+    {
+      "type": "webhook",
+      "name": "ZionWebhook",
+      "options": {
+        "customHeaders": ["x-zion-signature"],
+        "verifyHMAC": true,
+        "dedupKey": "meta.request_id"
+      }
+    }
+  ],
+  "routes": [
+    { "action": "calendar.create_event", "modules": ["Google Calendar", "Notion", "Logs"] },
+    { "action": "email.send_gmail", "modules": ["Gmail", "Logs"] },
+    { "action": "drive.*", "modules": ["Google Drive", "Logs"] },
+    { "action": "log.write", "modules": ["Logs"] }
+  ]
+}
