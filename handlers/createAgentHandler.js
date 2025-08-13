@@ -116,15 +116,16 @@ export function createAgentHandler(agentName) {
         data
       });
     } catch (error) {
-      console.error("Error fetching data from OpenAI:", error);
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "error",
-        status: 500,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Internal Server Error"
-      }));
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: `/api/${agentName}`,
+          action: "error",
+          status: 500,
+          userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+          message: error.message
+        })
+      );
       return res.status(500).json({
         success: false,
         status: 500,

@@ -94,22 +94,23 @@ export async function testTriggerHandler(req, res) {
       summary: "Webhook triggered",
       data
     });
-  } catch (error) {
-    console.error("Error triggering webhook:", error);
-    console.log(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      route: "/api/make/test-trigger",
-      action: "error",
-      status: 500,
-      userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-      message: "Internal Server Error"
-    }));
-    return res.status(500).json({
-      success: false,
-      status: 500,
-      summary: "Internal Server Error",
-      error: "Internal Server Error",
-      nextStep: "Check server logs and retry"
-    });
-  }
+    } catch (error) {
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: "/api/make/test-trigger",
+          action: "error",
+          status: 500,
+          userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+          message: error.message
+        })
+      );
+      return res.status(500).json({
+        success: false,
+        status: 500,
+        summary: "Internal Server Error",
+        error: "Internal Server Error",
+        nextStep: "Check server logs and retry"
+      });
+    }
 }

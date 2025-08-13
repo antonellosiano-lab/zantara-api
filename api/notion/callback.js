@@ -7,12 +7,28 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing or invalid `code` parameter' });
   }
 
-  console.log("🔐 ENV VARIABLES CHECK:");
+  console.log(
+    JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/notion/callback",
+      action: "envCheck",
+      status: 200,
+      message: "Checking environment variables"
+    })
+  );
   const notionToken = process.env.NOTION_TOKEN;
   const notionDatabaseId = process.env.NOTION_DATABASE_ID;
 
   if (!notionToken || !notionDatabaseId) {
-    console.error("❌ Missing NOTION_TOKEN or NOTION_DATABASE_ID");
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/notion/callback",
+        action: "error",
+        status: 500,
+        message: "Missing NOTION_TOKEN or NOTION_DATABASE_ID"
+      })
+    );
     return res.status(500).json({ error: "Missing environment variables" });
   }
 
@@ -39,11 +55,27 @@ export default async function handler(req, res) {
       }
     );
 
-    console.log("✅ Entry saved to Notion:", notionRes.data.id);
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/notion/callback",
+        action: "success",
+        status: 200,
+        message: `Entry saved to Notion: ${notionRes.data.id}`
+      })
+    );
     return res.status(200).json({ success: true, notionPageId: notionRes.data.id });
 
   } catch (error) {
-    console.error("❌ Error saving to Notion:", error.response?.data || error.message);
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/notion/callback",
+        action: "error",
+        status: 500,
+        message: error.message
+      })
+    );
     return res.status(500).json({ error: "Failed to save to Notion" });
   }
 }
