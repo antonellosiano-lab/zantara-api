@@ -1,3 +1,6 @@
+import { initObservability } from "../../lib/observability.js";
+initObservability();
+
 
 // pages/api/notion/test.js
 

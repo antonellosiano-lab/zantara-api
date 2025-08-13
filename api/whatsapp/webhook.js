@@ -1,3 +1,6 @@
+import { initObservability } from "../../lib/observability.js";
+initObservability();
+
 export default function handler(req, res) {
   const VERIFY_TOKEN = process.env.ZANTARA_WHATSAPP_TOKEN || "ZANTARA_WHATSAPP_TOKEN";
 

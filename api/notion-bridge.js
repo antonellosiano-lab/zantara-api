@@ -1,3 +1,6 @@
+import { initObservability } from "../lib/observability.js";
+initObservability();
+
 import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 import { sendNotionUpdate } from "../helpers/notionBridge.js";
