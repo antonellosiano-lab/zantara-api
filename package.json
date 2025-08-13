@@ -8,6 +8,7 @@
     "start": "node api/notion-write.js"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.4"
+    "@notionhq/client": "^2.2.4",
+    "node-mocks-http": "^1.17.2"
   }
 }
