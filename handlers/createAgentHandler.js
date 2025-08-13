@@ -86,7 +86,7 @@ export function createAgentHandler(agentName) {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
           "Notion-Version": "2022-06-28"
         },
         body: JSON.stringify({
@@ -106,7 +106,7 @@ export function createAgentHandler(agentName) {
         action: "success",
         status: 200,
         userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        summary: "Request completed successfully"
+        message: "Request completed successfully"
       }));
 
       return res.status(200).json({
@@ -116,14 +116,13 @@ export function createAgentHandler(agentName) {
         data
       });
     } catch (error) {
-      console.error("Error fetching data from OpenAI:", error);
       console.log(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: `/api/${agentName}`,
         action: "error",
         status: 500,
         userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Internal Server Error"
+        message: `Error fetching data from OpenAI: ${error.message}`
       }));
       return res.status(500).json({
         success: false,

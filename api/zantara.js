@@ -107,7 +107,6 @@ export default async function handler(req, res) {
         const response = await fetch(`${baseUrl}/api/${agent}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          "Notion-Version": "2022-06-28"
           body: JSON.stringify({ prompt, requester })
         });
         results[agent] = await response.json();
@@ -128,7 +127,7 @@ export default async function handler(req, res) {
         action: "orchestrate",
         status: 200,
         userIP,
-        summary: "All agents executed"
+        message: "All agents executed"
       })
     );
 

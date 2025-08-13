@@ -86,7 +86,7 @@ export async function triggerScenarioHandler(req, res) {
       action: "success",
       status: 200,
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-      summary: "Scenario triggered"
+      message: "Scenario triggered"
     }));
     return res.status(200).json({
       success: true,
@@ -95,14 +95,13 @@ export async function triggerScenarioHandler(req, res) {
       data
     });
   } catch (error) {
-    console.error("Error triggering scenario:", error);
     console.log(JSON.stringify({
       timestamp: new Date().toISOString(),
       route: "/api/make/trigger-scenario",
       action: "error",
       status: 500,
       userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-      message: "Internal Server Error"
+      message: `Error triggering scenario: ${error.message}`
     }));
     return res.status(500).json({
       success: false,
