@@ -27,7 +27,11 @@ describe("whatsapp webhook", () => {
 
   it("returns 500 when API key missing", async () => {
     delete process.env.OPENAI_API_KEY;
-    const req = httpMocks.createRequest({ method: "POST" });
+    const req = httpMocks.createRequest({
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: { requester: "Alice" }
+    });
     const res = httpMocks.createResponse();
     await handler(req, res);
     expect(res.statusCode).toBe(500);
@@ -36,6 +40,7 @@ describe("whatsapp webhook", () => {
   it("blocks specified requester", async () => {
     const req = httpMocks.createRequest({
       method: "POST",
+      headers: { "content-type": "application/json" },
       body: { requester: "Ruslantara" }
     });
     const res = httpMocks.createResponse();
@@ -43,8 +48,34 @@ describe("whatsapp webhook", () => {
     expect(res.statusCode).toBe(403);
   });
 
+  it("returns 400 for invalid content type", async () => {
+    const req = httpMocks.createRequest({
+      method: "POST",
+      headers: { "content-type": "text/plain" },
+      body: { requester: "Alice" }
+    });
+    const res = httpMocks.createResponse();
+    await handler(req, res);
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("returns 400 when requester missing", async () => {
+    const req = httpMocks.createRequest({
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: {}
+    });
+    const res = httpMocks.createResponse();
+    await handler(req, res);
+    expect(res.statusCode).toBe(400);
+  });
+
   it("returns 200 on valid POST", async () => {
-    const req = httpMocks.createRequest({ method: "POST", body: {} });
+    const req = httpMocks.createRequest({
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: { requester: "Alice" }
+    });
     const res = httpMocks.createResponse();
     await handler(req, res);
     expect(res.statusCode).toBe(200);
