@@ -75,4 +75,12 @@
 
 ---
 
+## 🌐 Environment Variables
+| Variabile | Descrizione |
+|-----------|-------------|
+| `OPENAI_API_KEY` | Chiave per accedere all'API di OpenAI. Deve essere definita nell'ambiente di deployment. |
+| `MAKE_API_TOKEN` | Token per l'integrazione con Make.com. Deve essere definito nell'ambiente di deployment. |
+
+---
+
 > Documento redatto per garantire coerenza, efficienza e intelligenza nello sviluppo AI-centric di ZANTARA.
