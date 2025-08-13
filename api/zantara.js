@@ -8,7 +8,13 @@ const agents = [
   "setupMaster",
   "taxGenius",
   "theLegalArchitect",
-  "visaOracle"
+  "visaOracle",
+  "dharmaguard",
+  "tanahsentinel",
+  "bigBrother",
+  "hsAtlas",
+  "theMatrix",
+  "zion"
 ];
 
 export default async function handler(req, res) {
