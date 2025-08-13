@@ -24,7 +24,15 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ message: "Success", data: response });
   } catch (error) {
-    console.error("Notion error:", error);
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/notion-write",
+        action: "error",
+        status: 500,
+        message: error.message
+      })
+    );
     return res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
 }
