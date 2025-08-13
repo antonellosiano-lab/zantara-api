@@ -1,8 +1,16 @@
 import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 import { getAgentPrompt } from "../constants/prompts.js";
+import { z } from "zod";
+import { isRateLimited } from "../helpers/rateLimiter.js";
+import { isDuplicateRequest } from "../helpers/idempotency.js";
 
 export function createAgentHandler(agentName) {
+  const bodySchema = z.object({
+    prompt: z.string(),
+    requester: z.string().optional()
+  });
+
   return async function handler(req, res) {
     if (req.method !== "POST") {
       console.log(JSON.stringify({
@@ -42,40 +50,89 @@ export function createAgentHandler(agentName) {
       });
     }
 
-    const { prompt, requester } = req.body || {};
+    const ip = (req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "")
+      .split(",")[0]
+      .trim();
 
-    if (!prompt) {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "promptValidation",
-        status: 400,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Missing prompt in request body"
-      }));
-      return res.status(400).json({
+    if (await isRateLimited(ip, agentName)) {
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: `/api/${agentName}`,
+          action: "rateLimit",
+          status: 429,
+          userIP: ip,
+          message: "Rate limit exceeded"
+        })
+      );
+      return res.status(429).json({
         success: false,
-        status: 400,
-        summary: "Missing prompt in request body",
-        error: "Missing prompt in request body",
-        nextStep: "Include prompt in JSON body"
+        status: 429,
+        summary: "Rate limit exceeded",
+        error: "Too Many Requests",
+        nextStep: "Wait before retrying"
       });
     }
 
+    const parsed = bodySchema.safeParse(req.body);
+    if (!parsed.success) {
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: `/api/${agentName}`,
+          action: "bodyValidation",
+          status: 400,
+          userIP: ip,
+          message: "Invalid request body"
+        })
+      );
+      return res.status(400).json({
+        success: false,
+        status: 400,
+        summary: "Invalid request body",
+        error: "Invalid request body",
+        nextStep: "Provide prompt in JSON body"
+      });
+    }
+
+    const { prompt, requester } = parsed.data;
+
     if (isBlockedRequester(requester)) {
-      console.log(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: `/api/${agentName}`,
-        action: "blockedRequester",
-        status: 403,
-        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
-        message: "Requester is blocked"
-      }));
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: `/api/${agentName}`,
+          action: "blockedRequester",
+          status: 403,
+          userIP: ip,
+          message: "Requester is blocked"
+        })
+      );
       return res.status(403).json({
         success: false,
         status: 403,
         summary: "Requester is blocked",
         error: "Access denied"
+      });
+    }
+
+    if (await isDuplicateRequest(req.body)) {
+      console.log(
+        JSON.stringify({
+          timestamp: new Date().toISOString(),
+          route: `/api/${agentName}`,
+          action: "idempotency",
+          status: 409,
+          userIP: ip,
+          message: "Duplicate request"
+        })
+      );
+      return res.status(409).json({
+        success: false,
+        status: 409,
+        summary: "Duplicate request",
+        error: "Duplicate request",
+        nextStep: "Modify request and retry"
       });
     }
 
