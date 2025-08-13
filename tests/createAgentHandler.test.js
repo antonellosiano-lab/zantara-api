@@ -1,11 +1,19 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
+
+vi.mock("../helpers/notionClient.js", () => ({
+  saveAgentOutput: vi.fn().mockResolvedValue()
+}));
+
+import { saveAgentOutput } from "../helpers/notionClient.js";
 import { createAgentHandler } from "../handlers/createAgentHandler.js";
 
 const handler = createAgentHandler("Test Agent");
 
 beforeEach(() => {
   process.env.OPENAI_API_KEY = "test";
+  process.env.NOTION_DATABASE_ID = "db";
+  vi.clearAllMocks();
 });
 
 describe("createAgentHandler", () => {
@@ -38,14 +46,17 @@ describe("createAgentHandler", () => {
     expect(res.statusCode).toBe(403);
   });
 
-  it("returns 200 on success", async () => {
+  it("returns 200 on success and logs to notion", async () => {
     global.fetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ result: "ok" })
+      json: () => Promise.resolve({
+        choices: [{ message: { content: "hello" } }]
+      })
     });
     const req = httpMocks.createRequest({ method: "POST", body: { prompt: "hi" } });
     const res = httpMocks.createResponse();
     await handler(req, res);
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res._getData()).success).toBe(true);
+    expect(saveAgentOutput).toHaveBeenCalledWith("db", "Test Agent", "hi", "hello");
   });
 });

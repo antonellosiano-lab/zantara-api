@@ -1,5 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
+
+vi.mock("../helpers/notionClient.js", () => ({
+  saveAgentOutput: vi.fn().mockResolvedValue()
+}));
+
 import handler from "../api/zantara.js";
 
 const agents = [
@@ -9,7 +14,7 @@ const agents = [
   "setupMaster",
   "taxGenius",
   "theLegalArchitect",
-  "visaOracle"
+  "visaOracle",
 ];
 
 beforeEach(() => {
@@ -65,4 +70,3 @@ describe("Zantara orchestrator", () => {
     expect(global.fetch).toHaveBeenCalledTimes(agents.length);
   });
 });
-
