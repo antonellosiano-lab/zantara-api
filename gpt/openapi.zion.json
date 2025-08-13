@@ -1,0 +1,68 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Zion API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://zion.example.com"
+    }
+  ],
+  "paths": {
+    "/api/zion": {
+      "post": {
+        "summary": "Execute Zion actions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Action"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Action response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Action": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "description": "Name of the action to perform"
+          },
+          "parameters": {
+            "type": "object",
+            "description": "Parameters for the action"
+          }
+        },
+        "required": ["action"]
+      },
+      "ActionResponse": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string" },
+          "summary": { "type": "string" },
+          "nextStep": { "type": "string" }
+        },
+        "required": ["status", "summary"]
+      }
+    }
+  }
+}
