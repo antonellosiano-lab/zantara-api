@@ -22,6 +22,14 @@ describe("testTriggerHandler", () => {
     expect(res.statusCode).toBe(400);
   });
 
+  it("returns 500 when Make token missing", async () => {
+    delete process.env.MAKE_API_TOKEN;
+    const req = httpMocks.createRequest({ method: "POST", body: { webhook_url: "url", payload: {} } });
+    const res = httpMocks.createResponse();
+    await testTriggerHandler(req, res);
+    expect(res.statusCode).toBe(500);
+  });
+
   it("returns 200 on success", async () => {
     global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ result: "ok" }) });
     const req = httpMocks.createRequest({ method: "POST", body: { webhook_url: "url", payload: {} } });

@@ -1,5 +1,14 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { triggerMakeWebhook } from "../lib/makeTrigger.js";
+
+beforeEach(() => {
+  process.env.MAKE_API_TOKEN = "test-token";
+});
+
+afterEach(() => {
+  delete process.env.MAKE_API_TOKEN;
+  vi.restoreAllMocks();
+});
 
 describe("ZANTARA > triggerMakeWebhook", () => {
   it("should send default payload to Make webhook", async () => {
@@ -17,8 +26,12 @@ describe("ZANTARA > triggerMakeWebhook", () => {
     expect(result).toBeDefined();
   });
 
+  it("should throw an error when token missing", async () => {
+    delete process.env.MAKE_API_TOKEN;
+    await expect(triggerMakeWebhook()).rejects.toThrow("Missing Make API Token");
+  });
+
   it("should throw an error for invalid URL", async () => {
-    // Override temporarily
     const originalURL = global.fetch;
     global.fetch = () => Promise.resolve({ ok: false, status: 400, text: () => "Bad Request" });
 
