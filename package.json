@@ -5,9 +5,14 @@
   "main": "index.js",
   "scripts": {
     "dev": "vercel dev",
-    "start": "node api/notion-write.js"
+    "start": "node api/notion-write.js",
+    "test": "vitest"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.4"
+  },
+  "devDependencies": {
+    "node-mocks-http": "^1.17.2",
+    "vitest": "^3.2.4"
   }
 }
