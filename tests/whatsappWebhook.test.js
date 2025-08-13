@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import httpMocks from "node-mocks-http";
-import handler from "../pages/api/webhooks/meta/whatsapp.js";
+import handler from "../api/whatsapp/webhook.js";
 
 beforeEach(() => {
   process.env.OPENAI_API_KEY = "test";

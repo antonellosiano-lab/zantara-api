@@ -9,7 +9,13 @@ const agents = [
   "setupMaster",
   "taxGenius",
   "theLegalArchitect",
-  "visaOracle"
+  "visaOracle",
+  "dharmaguard",
+  "tanahsentinel",
+  "bigBrother",
+  "hsAtlas",
+  "theMatrix",
+  "zion"
 ];
 
 beforeEach(() => {
