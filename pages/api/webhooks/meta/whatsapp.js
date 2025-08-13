@@ -16,7 +16,22 @@ export default async function handler(req, res) {
       );
       return res.status(200).send(challenge);
     }
-    return res.status(400).send("Missing challenge");
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/pages/api/webhooks/meta/whatsapp",
+        action: "challenge",
+        status: 400,
+        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+        message: "Missing challenge"
+      })
+    );
+    return res.status(400).json({
+      success: false,
+      status: 400,
+      summary: "Missing challenge",
+      error: "Missing challenge"
+    });
   }
 
   if (req.method !== "POST") {
@@ -35,7 +50,7 @@ export default async function handler(req, res) {
       status: 405,
       summary: "Method Not Allowed",
       error: "Method Not Allowed",
-      nextStep: "Use GET or POST"
+      nextStep: "Use POST"
     });
   }
 
@@ -61,7 +76,46 @@ export default async function handler(req, res) {
     });
   }
 
+  if (req.headers["content-type"] !== "application/json") {
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/pages/api/webhooks/meta/whatsapp",
+        action: "contentType",
+        status: 400,
+        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+        message: "Invalid Content-Type"
+      })
+    );
+    return res.status(400).json({
+      success: false,
+      status: 400,
+      summary: "Invalid content type",
+      error: "Content-Type must be application/json",
+      nextStep: "Set Content-Type to application/json"
+    });
+  }
+
   const { requester } = req.body || {};
+  if (!requester) {
+    console.log(
+      JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/pages/api/webhooks/meta/whatsapp",
+        action: "payloadValidation",
+        status: 400,
+        userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+        message: "Missing requester"
+      })
+    );
+    return res.status(400).json({
+      success: false,
+      status: 400,
+      summary: "Invalid payload",
+      error: "Missing requester",
+      nextStep: "Include requester in body"
+    });
+  }
 
   if (isBlockedRequester(requester)) {
     console.log(
