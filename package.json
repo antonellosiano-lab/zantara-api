@@ -9,5 +9,9 @@
   },
   "dependencies": {
     "@notionhq/client": "^2.2.4"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "vitest": "^3.2.4"
   }
 }
