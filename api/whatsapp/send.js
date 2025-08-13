@@ -1,19 +1,8 @@
-import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
-import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
-import { withSecurity } from "../helpers/security.js";
-
-const agents = [
-  "antonelloDaily",
-  "baliZeroHub",
-  "morgana",
-  "setupMaster",
-  "taxGenius",
-  "theLegalArchitect",
-  "visaOracle"
-];
+import { withSecurity } from "../../helpers/security.js";
+import { validateOpenAIKey } from "../../helpers/validateOpenAIKey.js";
 
 async function handler(req, res) {
-  const route = "/api/zantara";
+  const route = "/api/whatsapp/send";
   const userIP = req.headers["x-forwarded-for"] || req.socket?.remoteAddress;
 
   if (req.method !== "POST") {
@@ -58,88 +47,43 @@ async function handler(req, res) {
     });
   }
 
-  const { prompt, requester } = req.body || {};
-
-  if (!prompt) {
+  const { message } = req.body || {};
+  if (!message) {
     console.log(
       JSON.stringify({
         timestamp: new Date().toISOString(),
         route,
-        action: "promptValidation",
+        action: "messageValidation",
         status: 400,
         userIP,
-        message: "Missing prompt in request body"
+        message: "Missing message in request body"
       })
     );
     return res.status(400).json({
       success: false,
       status: 400,
-      summary: "Missing prompt in request body",
-      error: "Missing prompt in request body",
-      nextStep: "Include prompt in JSON body"
-    });
-  }
-
-  if (isBlockedRequester(requester)) {
-    console.log(
-      JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route,
-        action: "blockedRequester",
-        status: 403,
-        userIP,
-        message: "Requester is blocked"
-      })
-    );
-    return res.status(403).json({
-      success: false,
-      status: 403,
-      summary: "Requester is blocked",
-      error: "Access denied"
+      summary: "Missing message in request body",
+      error: "Missing message in request body",
+      nextStep: "Include message in JSON body"
     });
   }
 
   try {
-    const baseUrl = process.env.BASE_URL || `http://${req.headers.host}`;
-    const results = {};
-
-    for (const agent of agents) {
-      try {
-        const response = await fetch(`${baseUrl}/api/${agent}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Notion-Version": "2022-06-28",
-          },
-          body: JSON.stringify({ prompt, requester })
-        });
-        results[agent] = await response.json();
-      } catch (err) {
-        results[agent] = {
-          success: false,
-          status: 500,
-          summary: "Agent call failed",
-          error: "Agent call failed"
-        };
-      }
-    }
-
     console.log(
       JSON.stringify({
         timestamp: new Date().toISOString(),
         route,
-        action: "orchestrate",
+        action: "sendMessage",
         status: 200,
         userIP,
-        summary: "All agents executed"
+        summary: "Message accepted"
       })
     );
-
     return res.status(200).json({
       success: true,
       status: 200,
-      summary: "All agents executed",
-      data: results
+      summary: "Message accepted",
+      data: { message }
     });
   } catch (error) {
     console.log(
