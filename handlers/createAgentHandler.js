@@ -1,6 +1,7 @@
 import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 import { getAgentPrompt } from "../constants/prompts.js";
+import { logToNotion } from "../helpers/logToNotion.js";
 
 export function createAgentHandler(agentName) {
   return async function handler(req, res) {
@@ -87,7 +88,6 @@ export function createAgentHandler(agentName) {
         headers: {
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
           "Content-Type": "application/json"
-          "Notion-Version": "2022-06-28"
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
@@ -99,6 +99,7 @@ export function createAgentHandler(agentName) {
       });
 
       const data = await response.json();
+      await logToNotion(agentName, data.choices?.[0]?.message?.content);
 
       console.log(JSON.stringify({
         timestamp: new Date().toISOString(),

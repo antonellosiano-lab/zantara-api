@@ -1,5 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
+vi.mock("../helpers/logToNotion.js", () => ({ logToNotion: vi.fn() }));
+import { logToNotion } from "../helpers/logToNotion.js";
 import { createAgentHandler } from "../handlers/createAgentHandler.js";
 
 const handler = createAgentHandler("Test Agent");
@@ -47,5 +49,6 @@ describe("createAgentHandler", () => {
     await handler(req, res);
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res._getData()).success).toBe(true);
+    expect(logToNotion).toHaveBeenCalled();
   });
 });
