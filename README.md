@@ -76,3 +76,14 @@
 ---
 
 > Documento redatto per garantire coerenza, efficienza e intelligenza nello sviluppo AI-centric di ZANTARA.
+
+## Visa Oracle • Command Center
+
+To create the **Visa Oracle • Command Center** page in Notion:
+
+1. Open Notion and create a new page named **Visa Oracle • Command Center**.
+2. Copy the contents of [`/notion_templates/visa_oracle_command_center.md`](./notion_templates/visa_oracle_command_center.md).
+3. Paste the template into the new page to apply it.
+4. Customize sections or properties as needed.
+
+This template offers a consistent layout for managing incoming requests, research notes, action items, and resources.
