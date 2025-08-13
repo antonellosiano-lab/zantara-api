@@ -1,3 +1,6 @@
+import { initObservability } from "../lib/observability.js";
+initObservability();
+
 import { Client } from "@notionhq/client";
 
 const notion = new Client({ auth: process.env.NOTION_TOKEN });

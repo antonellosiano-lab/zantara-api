@@ -1,3 +1,6 @@
+import { initObservability } from "../../lib/observability.js";
+initObservability();
+
 import axios from 'axios';
 
 export default async function handler(req, res) {
