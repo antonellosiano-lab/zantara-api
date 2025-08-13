@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
 import { triggerScenarioHandler } from "../handlers/triggerScenarioHandler.js";
+import { timedRequest } from "./utils/requestTimer.js";
 
 beforeEach(() => {
   process.env.OPENAI_API_KEY = "test";
@@ -11,7 +12,7 @@ describe("triggerScenarioHandler", () => {
   it("returns 405 for non-POST", async () => {
     const req = httpMocks.createRequest({ method: "GET" });
     const res = httpMocks.createResponse();
-    await triggerScenarioHandler(req, res);
+    await timedRequest("triggerScenario", triggerScenarioHandler, req, res);
     expect(res.statusCode).toBe(405);
   });
 
@@ -19,21 +20,21 @@ describe("triggerScenarioHandler", () => {
     delete process.env.OPENAI_API_KEY;
     const req = httpMocks.createRequest({ method: "POST", body: { scenario_id: "1", webhook_url: "url", payload: {} } });
     const res = httpMocks.createResponse();
-    await triggerScenarioHandler(req, res);
+    await timedRequest("triggerScenario", triggerScenarioHandler, req, res);
     expect(res.statusCode).toBe(500);
   });
 
   it("returns 400 when fields missing", async () => {
     const req = httpMocks.createRequest({ method: "POST" });
     const res = httpMocks.createResponse();
-    await triggerScenarioHandler(req, res);
+    await timedRequest("triggerScenario", triggerScenarioHandler, req, res);
     expect(res.statusCode).toBe(400);
   });
 
   it("returns 403 for blocked requester", async () => {
     const req = httpMocks.createRequest({ method: "POST", body: { scenario_id: "1", webhook_url: "url", payload: {}, requester: "Ruslantara" } });
     const res = httpMocks.createResponse();
-    await triggerScenarioHandler(req, res);
+    await timedRequest("triggerScenario", triggerScenarioHandler, req, res);
     expect(res.statusCode).toBe(403);
   });
 
@@ -41,7 +42,7 @@ describe("triggerScenarioHandler", () => {
     global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ result: "ok" }) });
     const req = httpMocks.createRequest({ method: "POST", body: { scenario_id: "1", webhook_url: "url", payload: {} } });
     const res = httpMocks.createResponse();
-    await triggerScenarioHandler(req, res);
+    await timedRequest("triggerScenario", triggerScenarioHandler, req, res);
     expect(res.statusCode).toBe(200);
     expect(JSON.parse(res._getData()).success).toBe(true);
   });
