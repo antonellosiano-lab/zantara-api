@@ -1,0 +1,13 @@
+{
+  "notion": {
+    "tasks_db_id": "",
+    "meetings_db_id": "",
+    "logs_db_id": "",
+    "projects_db_id": "",
+    "contacts_db_id": "",
+    "scenarios_db_id": ""
+  },
+  "drive": {
+    "root_folder_id": ""
+  }
+}

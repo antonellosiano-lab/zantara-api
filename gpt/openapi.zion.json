@@ -1,0 +1,58 @@
+{
+  "openapi": "3.1.0",
+  "info": { "title": "ZION API", "version": "1.0.0" },
+  "servers": [{ "url": "https://example.com/api" }],
+  "paths": {
+    "/zion": {
+      "post": {
+        "operationId": "sendZionCommand",
+        "summary": "Execute ZION command",
+        "security": [{ "ZionKey": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["action","payload"],
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "notion.create_page","notion.update_page","notion.query_database","notion.append_block",
+                      "drive.create_folder","drive.create_doc_from_text","drive.upload_file_base64","drive.move","drive.share",
+                      "calendar.create_event","email.send_gmail","whatsapp.send_text","log.write"
+                    ]
+                  },
+                  "payload": { "type": "object" },
+                  "meta": {
+                    "type": "object",
+                    "properties": {
+                      "request_id": { "type": "string" },
+                      "source_agent": { "type": "string" },
+                      "dry_run": { "type": "boolean" },
+                      "ts": { "type": "string" },
+                      "log_to_notion": { "type": "boolean" },
+                      "require_approval": { "type": "boolean" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Command executed" },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Server error" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ZionKey": { "type": "apiKey", "in": "header", "name": "x-zion-key" }
+    }
+  }
+}

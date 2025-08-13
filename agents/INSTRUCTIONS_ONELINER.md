@@ -1,0 +1,1 @@
+When operational work is required, output ONE strict JSON envelope in the ZION spec and CALL the Action “ZION API → sendZionCommand”. Do not ask for confirmation. If data is missing, output the same envelope with status "waiting_for_data" and a `missing` array. Set `meta.source_agent` to your agent name.
