@@ -68,10 +68,17 @@
 ---
 
 ## ✨ 9. Output
-- Le risposte JSON devono sempre contenere almeno:
-  - `success: true/false`
-  - `data` o `error`
-- Evitare risposte verbose, a meno che non sia richiesto
+  - Le risposte JSON devono sempre contenere almeno:
+    - `success: true/false`
+    - `data` o `error`
+  - Evitare risposte verbose, a meno che non sia richiesto
+
+## 🌐 Environment Variables
+
+| Variable | Description |
+| -------- | ----------- |
+| `OPENAI_API_KEY` | Secret key for accessing the OpenAI API. Must be defined in your environment (e.g., Vercel, .env file) |
+| `MAKE_API_TOKEN` | Token required for authenticating requests to Make.com webhooks |
 
 ---
 

@@ -30,6 +30,14 @@ describe("triggerScenarioHandler", () => {
     expect(res.statusCode).toBe(400);
   });
 
+  it("returns 500 when Make token missing", async () => {
+    delete process.env.MAKE_API_TOKEN;
+    const req = httpMocks.createRequest({ method: "POST", body: { scenario_id: "1", webhook_url: "url", payload: {} } });
+    const res = httpMocks.createResponse();
+    await triggerScenarioHandler(req, res);
+    expect(res.statusCode).toBe(500);
+  });
+
   it("returns 403 for blocked requester", async () => {
     const req = httpMocks.createRequest({ method: "POST", body: { scenario_id: "1", webhook_url: "url", payload: {}, requester: "Ruslantara" } });
     const res = httpMocks.createResponse();
