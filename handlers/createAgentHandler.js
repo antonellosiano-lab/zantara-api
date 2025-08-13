@@ -86,8 +86,8 @@ export function createAgentHandler(agentName) {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-          "Content-Type": "application/json"
-          "Notion-Version": "2022-06-28"
+          "Content-Type": "application/json",
+          "Notion-Version": "2022-06-28",
         },
         body: JSON.stringify({
           model: "gpt-4o-mini",
