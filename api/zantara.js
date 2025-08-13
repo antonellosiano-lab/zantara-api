@@ -2,12 +2,9 @@ import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 
 const agents = [
-  "antonelloDaily",
-  "baliZeroHub",
   "morgana",
   "setupMaster",
   "taxGenius",
-  "theLegalArchitect",
   "visaOracle"
 ];
 
