@@ -1,5 +1,6 @@
-const blocked = ["Ruslantara", "Deanto"];
+const blocked = ["ruslantara", "deanto"];
 
 export function isBlockedRequester(name = "") {
-  return blocked.includes(name);
+  const lower = name.toLowerCase();
+  return blocked.some((b) => lower.includes(b));
 }
