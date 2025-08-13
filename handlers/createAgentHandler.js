@@ -2,7 +2,7 @@ import { validateOpenAIKey } from "../helpers/validateOpenAIKey.js";
 import { isBlockedRequester } from "../helpers/checkBlockedRequester.js";
 import { getAgentPrompt } from "../constants/prompts.js";
 
-export function createAgentHandler(agentName) {
+export function createAgentHandler(agentName, onResult) {
   return async function handler(req, res) {
     if (req.method !== "POST") {
       console.log(JSON.stringify({
@@ -99,6 +99,23 @@ export function createAgentHandler(agentName) {
       });
 
       const data = await response.json();
+
+      try {
+        if (onResult) {
+          await onResult(prompt, data);
+        }
+      } catch (err) {
+        console.log(
+          JSON.stringify({
+            timestamp: new Date().toISOString(),
+            route: `/api/${agentName}`,
+            action: "logError",
+            status: 500,
+            userIP: req.headers["x-forwarded-for"] || req.socket?.remoteAddress,
+            message: err.message
+          })
+        );
+      }
 
       console.log(JSON.stringify({
         timestamp: new Date().toISOString(),
