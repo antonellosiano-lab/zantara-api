@@ -1,7 +1,9 @@
-import { DEFAULT_MAKE_API_TOKEN } from "../constants/make.js";
-
 export async function postToWebhook(url, payload) {
-  const token = process.env.MAKE_API_TOKEN || DEFAULT_MAKE_API_TOKEN;
+  const token = process.env.MAKE_API_TOKEN;
+  if (!token) {
+    throw new Error("Missing Make API token");
+  }
+
   const response = await fetch(url, {
     method: "POST",
     headers: {

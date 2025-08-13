@@ -23,6 +23,14 @@ describe("triggerScenarioHandler", () => {
     expect(res.statusCode).toBe(500);
   });
 
+  it("returns 500 when MAKE_API_TOKEN missing", async () => {
+    delete process.env.MAKE_API_TOKEN;
+    const req = httpMocks.createRequest({ method: "POST", body: { scenario_id: "1", webhook_url: "url", payload: {} } });
+    const res = httpMocks.createResponse();
+    await triggerScenarioHandler(req, res);
+    expect(res.statusCode).toBe(500);
+  });
+
   it("returns 400 when fields missing", async () => {
     const req = httpMocks.createRequest({ method: "POST" });
     const res = httpMocks.createResponse();

@@ -75,4 +75,13 @@
 
 ---
 
+## 🌐 Environment Variables
+
+| Variable          | Description                                                                 |
+|-------------------|-----------------------------------------------------------------------------|
+| `OPENAI_API_KEY`  | Secret key for accessing the OpenAI API. Must be defined in your environment |
+| `MAKE_API_TOKEN`  | Token for authenticating requests to Make.com. Must be defined in your environment |
+
+---
+
 > Documento redatto per garantire coerenza, efficienza e intelligenza nello sviluppo AI-centric di ZANTARA.

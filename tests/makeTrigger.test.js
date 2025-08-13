@@ -1,5 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { triggerMakeWebhook } from "../lib/makeTrigger.js";
+
+beforeEach(() => {
+  process.env.MAKE_API_TOKEN = "test-token";
+});
 
 describe("ZANTARA > triggerMakeWebhook", () => {
   it("should send default payload to Make webhook", async () => {
@@ -25,6 +29,11 @@ describe("ZANTARA > triggerMakeWebhook", () => {
     await expect(triggerMakeWebhook()).rejects.toThrow("Make webhook error");
 
     global.fetch = originalURL;
+  });
+
+  it("should throw when MAKE_API_TOKEN is missing", async () => {
+    delete process.env.MAKE_API_TOKEN;
+    await expect(triggerMakeWebhook()).rejects.toThrow("Missing Make API token");
   });
 });
 
