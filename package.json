@@ -9,5 +9,8 @@
   },
   "dependencies": {
     "@notionhq/client": "^2.2.4"
+  },
+  "devDependencies": {
+    "node-mocks-http": "^1.17.2"
   }
 }
