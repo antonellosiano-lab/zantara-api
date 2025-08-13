@@ -9,10 +9,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@notionhq/client": "^2.2.4"
+    "@logtail/node": "^0.5.5",
+    "@notionhq/client": "^2.2.4",
+    "@sentry/node": "^10.5.0"
   },
   "devDependencies": {
-    "vitest": "^3.2.4",
-    "node-mocks-http": "^1.17.2"
+    "node-mocks-http": "^1.17.2",
+    "vitest": "^3.2.4"
   }
 }
