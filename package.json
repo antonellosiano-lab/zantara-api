@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vercel dev",
     "start": "node api/notion-write.js",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e:whatsapp": "node scripts/whatsappSendPreview.js"
   },
   "dependencies": {
     "@notionhq/client": "^2.2.4"
