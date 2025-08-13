@@ -4,18 +4,51 @@ import handler from "../pages/api/webhooks/meta/whatsapp.js";
 
 beforeEach(() => {
   process.env.OPENAI_API_KEY = "test";
+  process.env.ZANTARA_WHATSAPP_TOKEN = "token";
 });
 
 describe("whatsapp webhook", () => {
-  it("returns challenge for GET", async () => {
+  it("returns challenge for valid GET", async () => {
     const req = httpMocks.createRequest({
       method: "GET",
-      query: { "hub.challenge": "1234" }
+      query: {
+        "hub.mode": "subscribe",
+        "hub.verify_token": "token",
+        "hub.challenge": "1234",
+      },
     });
     const res = httpMocks.createResponse();
     await handler(req, res);
     expect(res.statusCode).toBe(200);
     expect(res._getData()).toBe("1234");
+  });
+
+  it("returns 403 for invalid token", async () => {
+    const req = httpMocks.createRequest({
+      method: "GET",
+      query: {
+        "hub.mode": "subscribe",
+        "hub.verify_token": "wrong",
+        "hub.challenge": "1234",
+      },
+    });
+    const res = httpMocks.createResponse();
+    await handler(req, res);
+    expect(res.statusCode).toBe(403);
+  });
+
+  it("returns 403 for invalid mode", async () => {
+    const req = httpMocks.createRequest({
+      method: "GET",
+      query: {
+        "hub.mode": "invalid",
+        "hub.verify_token": "token",
+        "hub.challenge": "1234",
+      },
+    });
+    const res = httpMocks.createResponse();
+    await handler(req, res);
+    expect(res.statusCode).toBe(403);
   });
 
   it("returns 405 for invalid method", async () => {
