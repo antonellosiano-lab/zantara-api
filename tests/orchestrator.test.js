@@ -1,13 +1,25 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
-import handler from "../api/zantara.js";
+import handler from "../api/orchestrator.js";
+
+const agents = [
+  "antonelloDaily",
+  "baliZeroHub",
+  "morgana",
+  "setupMaster",
+  "taxGenius",
+  "theLegalArchitect",
+  "visaOracle",
+  "zantara"
+];
 
 beforeEach(() => {
   process.env.OPENAI_API_KEY = "test";
+  process.env.BASE_URL = "http://localhost";
   vi.resetAllMocks();
 });
 
-describe("Zantara agent", () => {
+describe("Orchestrator", () => {
   it("returns 405 for non-POST", async () => {
     const req = httpMocks.createRequest({ method: "GET" });
     const res = httpMocks.createResponse();
@@ -31,15 +43,15 @@ describe("Zantara agent", () => {
   });
 
   it("returns 403 for blocked requester", async () => {
-    const req = httpMocks.createRequest({ method: "POST", body: { prompt: "hi", requester: "Deanto" } });
+    const req = httpMocks.createRequest({ method: "POST", body: { prompt: "hi", requester: "Ruslantara" } });
     const res = httpMocks.createResponse();
     await handler(req, res);
     expect(res.statusCode).toBe(403);
   });
 
-  it("returns 200 on success", async () => {
+  it("returns 200 on success and aggregates results", async () => {
     global.fetch = vi.fn().mockResolvedValue({
-      json: () => Promise.resolve({ choices: [{ message: { content: "ok" } }] })
+      json: () => Promise.resolve({ success: true })
     });
 
     const req = httpMocks.createRequest({ method: "POST", body: { prompt: "hi", requester: "user" } });
@@ -50,6 +62,8 @@ describe("Zantara agent", () => {
     expect(res.statusCode).toBe(200);
     const data = JSON.parse(res._getData());
     expect(data.success).toBe(true);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(Object.keys(data.data)).toEqual(agents);
+    expect(global.fetch).toHaveBeenCalledTimes(agents.length);
   });
 });
+
