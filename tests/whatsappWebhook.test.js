@@ -1,9 +1,12 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import httpMocks from "node-mocks-http";
 import handler from "../pages/api/webhooks/meta/whatsapp.js";
+import { resetRedisForTest } from "../helpers/redisClient.js";
 
-beforeEach(() => {
+beforeEach(async () => {
   process.env.OPENAI_API_KEY = "test";
+  process.env.RATE_LIMIT_MAX_REQUESTS = "100";
+  await resetRedisForTest();
 });
 
 describe("whatsapp webhook", () => {

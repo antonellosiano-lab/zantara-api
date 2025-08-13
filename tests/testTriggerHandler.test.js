@@ -1,10 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import httpMocks from "node-mocks-http";
 import { testTriggerHandler } from "../handlers/testTriggerHandler.js";
+import { resetRedisForTest } from "../helpers/redisClient.js";
 
-beforeEach(() => {
+beforeEach(async () => {
   process.env.OPENAI_API_KEY = "test";
   process.env.MAKE_API_TOKEN = "make-test";
+  process.env.RATE_LIMIT_MAX_REQUESTS = "100";
+  await resetRedisForTest();
 });
 
 describe("testTriggerHandler", () => {
@@ -24,7 +27,7 @@ describe("testTriggerHandler", () => {
 
   it("returns 200 on success", async () => {
     global.fetch = vi.fn().mockResolvedValue({ json: () => Promise.resolve({ result: "ok" }) });
-    const req = httpMocks.createRequest({ method: "POST", body: { webhook_url: "url", payload: {} } });
+    const req = httpMocks.createRequest({ method: "POST", body: { webhook_url: "https://example.com", payload: {} }, headers: { "x-forwarded-for": "4.4.4.4" } });
     const res = httpMocks.createResponse();
     await testTriggerHandler(req, res);
     expect(res.statusCode).toBe(200);
