@@ -3,12 +3,9 @@ import httpMocks from "node-mocks-http";
 import handler from "../api/zantara.js";
 
 const agents = [
-  "antonelloDaily",
-  "baliZeroHub",
   "morgana",
   "setupMaster",
   "taxGenius",
-  "theLegalArchitect",
   "visaOracle"
 ];
 
