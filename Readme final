@@ -76,3 +76,39 @@
 ---
 
 > Documento redatto per garantire coerenza, efficienza e intelligenza nello sviluppo AI-centric di ZANTARA.
+
+---
+
+## 🌐 Environment Variables
+
+| Variable | Description |
+|---|---|
+| `OPENAI_API_KEY` | Secret key for accessing the OpenAI API. Must be defined in your environment (e.g., Vercel, .env file). |
+| `PRO_POWER_API_URL` | Endpoint for sending `{ prompt, result }` payloads to the Pro Power service. |
+
+## ⚡ Example: /api/zantaraProPower
+
+**Request**
+```bash
+POST /api/zantaraProPower
+Content-Type: application/json
+
+{ "prompt": "Explain quantum computing" }
+```
+
+**Response**
+```json
+{
+  "success": true,
+  "status": 200,
+  "summary": "Request completed successfully",
+  "data": {
+    "proPower": {
+      "success": true,
+      "status": 200,
+      "summary": "Pro Power API call succeeded",
+      "data": { "message": "processed" }
+    }
+  }
+}
+```
