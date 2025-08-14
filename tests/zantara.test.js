@@ -9,7 +9,8 @@ const agents = [
   "setupMaster",
   "taxGenius",
   "theLegalArchitect",
-  "visaOracle"
+  "visaOracle",
+  "zantaraProPower"
 ];
 
 beforeEach(() => {

@@ -8,7 +8,8 @@ const agents = [
   "setupMaster",
   "taxGenius",
   "theLegalArchitect",
-  "visaOracle"
+  "visaOracle",
+  "zantaraProPower"
 ];
 
 export default async function handler(req, res) {
