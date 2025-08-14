@@ -76,3 +76,30 @@
 ---
 
 > Documento redatto per garantire coerenza, efficienza e intelligenza nello sviluppo AI-centric di ZANTARA.
+
+## Zantara Pro Power Endpoint
+
+### Route
+`POST /api/zantaraProPower`
+
+### Request Body
+```
+{
+  "prompt": "Your prompt here",
+  "requester": "optional"
+}
+```
+
+### Response
+```
+{
+  "success": true,
+  "status": 200,
+  "summary": "Request completed successfully",
+  "data": {
+    "choices": []
+  }
+}
+```
+
+Blocked requesters "Ruslantara" and "Deanto" will receive a 403 response.
